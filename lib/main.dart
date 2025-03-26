@@ -1,3 +1,4 @@
+import 'package:b3_dev/views/contact_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false, 
-      home: const Text('null'),
+      home: const ContactPage(),
     );
   }
 }
