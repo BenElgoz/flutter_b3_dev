@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
-import 'about_page.dart';
-import 'second_page.dart';
-import 'articles_page.dart';
+import '../widgets/app_scaffold.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});
@@ -30,7 +27,6 @@ class _ContactPageState extends State<ContactPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Message envoyé avec succès !')),
       );
-
       _formKey.currentState!.reset();
       _nameController.clear();
       _emailController.clear();
@@ -40,72 +36,8 @@ class _ContactPageState extends State<ContactPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Contact')),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.lightGreen,
-              ),
-              child: Text('Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              title: const Text('Accueil'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Seconde Page'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SecondPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('À propos'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Contact'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ContactPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Articles'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ArticlesPage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+    return AppScaffold(
+      title: 'Contact',
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -118,12 +50,8 @@ class _ContactPageState extends State<ContactPage> {
                   labelText: 'Nom',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer votre nom';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    (value == null || value.isEmpty) ? 'Veuillez entrer votre nom' : null,
               ),
               const SizedBox(height: 16.0),
               TextFormField(
@@ -134,9 +62,7 @@ class _ContactPageState extends State<ContactPage> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer votre email';
-                  }
+                  if (value == null || value.isEmpty) return 'Veuillez entrer votre email';
                   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                     return 'Veuillez entrer un email valide';
                   }
@@ -151,12 +77,8 @@ class _ContactPageState extends State<ContactPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 4,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un message';
-                  }
-                  return null;
-                },
+                validator: (value) =>
+                    (value == null || value.isEmpty) ? 'Veuillez entrer un message' : null,
               ),
               const SizedBox(height: 24.0),
               ElevatedButton(

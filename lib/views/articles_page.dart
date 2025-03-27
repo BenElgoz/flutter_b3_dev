@@ -3,11 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/article.dart';
+import '../widgets/app_scaffold.dart';
 import 'article_detail_page.dart';
-import 'home_page.dart';
-import 'second_page.dart';
-import 'about_page.dart';
-import 'contact_page.dart';
 
 class ArticlesPage extends StatefulWidget {
   const ArticlesPage({super.key});
@@ -20,9 +17,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
   late Future<List<Article>> futureArticles;
 
   Future<List<Article>> fetchArticles() async {
-    final response = await http
-        .get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
-
+    final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
     if (response.statusCode == 200) {
       final List jsonData = json.decode(response.body);
       return jsonData.map((json) => Article.fromJson(json)).toList();
@@ -39,74 +34,15 @@ class _ArticlesPageState extends State<ArticlesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Articles')),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.lightGreen),
-              child: Text('Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              title: const Text('Accueil'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const HomePage()));
-              },
-            ),
-            ListTile(
-              title: const Text('Seconde Page'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SecondPage()));
-              },
-            ),
-            ListTile(
-              title: const Text('À propos'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AboutPage()));
-              },
-            ),
-            ListTile(
-              title: const Text('Contact'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ContactPage()));
-              },
-            ),
-            ListTile(
-              title: const Text('Articles'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
+    return AppScaffold(
+      title: 'Articles',
       body: FutureBuilder<List<Article>>(
         future: futureArticles,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(
-                child: Text('Erreur : ${snapshot.error.toString()}'));
+            return Center(child: Text('Erreur : ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Aucun article trouvé.'));
           }
