@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../views/home_page.dart';
 import '../views/second_page.dart';
 import '../views/about_page.dart';
 import '../views/contact_page.dart';
 import '../views/articles_page.dart';
+import '../controllers/theme_controller.dart';
 
 class AppScaffold extends StatelessWidget {
   final String title;
@@ -51,6 +54,18 @@ class AppScaffold extends StatelessWidget {
               title: const Text('Articles'),
               onTap: () {
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ArticlesPage()));
+              },
+            ),
+            const Divider(),
+            Consumer<ThemeController>(
+              builder: (context, themeController, _) {
+                return SwitchListTile(
+                  title: const Text('Mode sombre'),
+                  value: themeController.isDarkMode,
+                  onChanged: (_) {
+                    themeController.toggleTheme();
+                  },
+                );
               },
             ),
           ],
