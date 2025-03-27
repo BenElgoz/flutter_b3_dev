@@ -16,6 +16,10 @@ class ArticlesPage extends StatefulWidget {
 class _ArticlesPageState extends State<ArticlesPage> {
   late Future<List<Article>> futureArticles;
 
+  final int _articlesPerPage = 10;
+  int _currentPage = 0;
+  List<Article> _allArticles = [];
+
   Future<List<Article>> fetchArticles() async {
     final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
     if (response.statusCode == 200) {
@@ -30,6 +34,31 @@ class _ArticlesPageState extends State<ArticlesPage> {
   void initState() {
     super.initState();
     futureArticles = fetchArticles();
+  }
+
+  void _goToNextPage() {
+    if ((_currentPage + 1) * _articlesPerPage < _allArticles.length) {
+      setState(() {
+        _currentPage++;
+      });
+    }
+  }
+
+  void _goToPreviousPage() {
+    if (_currentPage > 0) {
+      setState(() {
+        _currentPage--;
+      });
+    }
+  }
+
+  List<Article> _getPaginatedArticles() {
+    final start = _currentPage * _articlesPerPage;
+    final end = (_currentPage + 1) * _articlesPerPage;
+    return _allArticles.sublist(
+      start,
+      end > _allArticles.length ? _allArticles.length : end,
+    );
   }
 
   @override
@@ -47,25 +76,52 @@ class _ArticlesPageState extends State<ArticlesPage> {
             return const Center(child: Text('Aucun article trouvé.'));
           }
 
-          final articles = snapshot.data!;
+          _allArticles = snapshot.data!;
+          final paginatedArticles = _getPaginatedArticles();
 
-          return ListView.separated(
-            itemCount: articles.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final article = articles[index];
-              return ListTile(
-                title: Text(article.title),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ArticleDetailPage(article: article),
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  itemCount: paginatedArticles.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final article = paginatedArticles[index];
+                    return ListTile(
+                      title: Text(article.title),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ArticleDetailPage(article: article),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _currentPage > 0 ? _goToPreviousPage : null,
+                      child: const Text('Précédent'),
                     ),
-                  );
-                },
-              );
-            },
+                    Text('Page ${_currentPage + 1} / ${(_allArticles.length / _articlesPerPage).ceil()}'),
+                    ElevatedButton(
+                      onPressed: (_currentPage + 1) * _articlesPerPage < _allArticles.length
+                          ? _goToNextPage
+                          : null,
+                      child: const Text('Suivant'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),
