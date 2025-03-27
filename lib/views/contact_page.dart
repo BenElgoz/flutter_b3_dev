@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
 import '../widgets/app_scaffold.dart';
 
 class ContactPage extends StatefulWidget {
@@ -22,11 +25,36 @@ class _ContactPageState extends State<ContactPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _saveFormData() async {
+    final newEntry = {
+      'name': _nameController.text,
+      'email': _emailController.text,
+      'message': _messageController.text,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString('contactMessages');
+
+    List<dynamic> messages = [];
+
+    if (existing != null && existing.trim().isNotEmpty) {
+      messages = jsonDecode(existing);
+    }
+
+    messages.add(newEntry);
+
+    await prefs.setString('contactMessages', jsonEncode(messages));
+  }
+
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      await _saveFormData();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Message envoyé avec succès !')),
+        const SnackBar(content: Text('Message envoyé !')),
       );
+
       _formKey.currentState!.reset();
       _nameController.clear();
       _emailController.clear();
@@ -50,8 +78,9 @@ class _ContactPageState extends State<ContactPage> {
                   labelText: 'Nom',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Veuillez entrer votre nom' : null,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? 'Veuillez entrer votre nom'
+                    : null,
               ),
               const SizedBox(height: 16.0),
               TextFormField(
@@ -62,7 +91,9 @@ class _ContactPageState extends State<ContactPage> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Veuillez entrer votre email';
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer votre email';
+                  }
                   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                     return 'Veuillez entrer un email valide';
                   }
@@ -77,8 +108,9 @@ class _ContactPageState extends State<ContactPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 4,
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Veuillez entrer un message' : null,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? 'Veuillez entrer un message'
+                    : null,
               ),
               const SizedBox(height: 24.0),
               ElevatedButton(
