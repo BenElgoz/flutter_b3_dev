@@ -1,7 +1,7 @@
 class Article {
-  final int id;
-  final String title;
-  final String body;
+  final int id; // identifiant de l’article
+  final String title; // titre de l’article
+  final String body; // contenu (texte)
 
   Article({
     required this.id,
@@ -9,6 +9,7 @@ class Article {
     required this.body,
   });
 
+  // construit un Article à partir d’un JSON
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
       id: json['id'],

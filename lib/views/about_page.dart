@@ -14,14 +14,13 @@ class AboutPage extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.all(15.0),
               child: Text(
-                'Bienvenue sur la page à propos, voici une courte description de l\'application :  Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet '
-                ,
+                'Bienvenue sur la page à propos, voici une courte description de l\'application :  Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet ',
                 textAlign: TextAlign.justify,
               ),
             ),
             const SizedBox(height: 16),
             Image.asset(
-              'assets/images/came.jpg',
+              'assets/images/came.jpg', // image locale (dans assets/images/)
               width: 400,
               height: 400,
             ),

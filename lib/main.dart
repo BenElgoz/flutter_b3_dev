@@ -7,7 +7,7 @@ import 'package:b3_dev/controllers/theme_controller.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ThemeController(),
+      create: (_) => ThemeController(), // injecte le contrôleur thème
       child: const MyApp(),
     ),
   );
@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeController = Provider.of<ThemeController>(context);
+    final themeController =
+        Provider.of<ThemeController>(context); // accès au thème
 
     return MaterialApp(
       title: 'App B3 MDS',
@@ -36,9 +37,9 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: themeController.currentTheme,
-      debugShowCheckedModeBanner: false,
-      home: const HomePage(),
+      themeMode: themeController.currentTheme, // switch light/dark
+      debugShowCheckedModeBanner: false, // enlève le tag debug
+      home: const HomePage(), // page d'accueil
     );
   }
 }
