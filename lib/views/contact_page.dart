@@ -1,19 +1,17 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // stockage local (clé/valeur)
 import 'dart:convert'; // pour gérer JSON (encodage/décodage)
-import '../widgets/app_scaffold.dart'; 
+import '../widgets/app_scaffold.dart';
 
 class ContactPage extends StatefulWidget {
-  const ContactPage({super.key}); 
+  const ContactPage({super.key});
 
   @override
-  State<ContactPage> createState() =>
-      _ContactPageState();
+  State<ContactPage> createState() => _ContactPageState();
 }
 
 class _ContactPageState extends State<ContactPage> {
-  final _formKey = GlobalKey<
-      FormState>(); // identifie le formulaire, sert pour la validation
+  final _formKey = GlobalKey<FormState>(); // identifie le formulaire, sert pour la validation
   final _nameController = TextEditingController(); // champ nom
   final _emailController = TextEditingController(); // "" email
   final _messageController = TextEditingController(); // "" message
@@ -36,10 +34,8 @@ class _ContactPageState extends State<ContactPage> {
       'timestamp': DateTime.now().toIso8601String(), // date ISO
     };
 
-    final prefs =
-        await SharedPreferences.getInstance(); // récup accès au stockage
-    final existing =
-        prefs.getString('contactMessages'); // récup les données existantes
+    final prefs = await SharedPreferences.getInstance(); // récup accès au stockage
+    final existing = prefs.getString('contactMessages'); // récup les données existantes
 
     List<dynamic> messages = [];
 
@@ -59,6 +55,8 @@ class _ContactPageState extends State<ContactPage> {
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       await _saveFormData(); // enregistre dans shared_preferences
+
+      if (!mounted) return; // évite d'utiliser context si le widget a été démonté
 
       ScaffoldMessenger.of(context).showSnackBar(
         // feedback visuel
@@ -89,9 +87,12 @@ class _ContactPageState extends State<ContactPage> {
                   labelText: 'Nom',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) => (value == null || value.isEmpty)
-                    ? 'Veuillez entrer votre nom'
-                    : null, // valide : champ obligatoire
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer votre nom';
+                  }
+                  return null;
+                }, // valide : champ obligatoire
               ),
               const SizedBox(height: 16.0),
 
@@ -101,13 +102,14 @@ class _ContactPageState extends State<ContactPage> {
                   labelText: 'Email',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType:
-                    TextInputType.emailAddress, // clavier adapté email
+                keyboardType: TextInputType.emailAddress, // clavier adapté email
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Veuillez entrer votre email';
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                     return 'Veuillez entrer un email valide'; // regex simple
+                  }
                   return null;
                 },
               ),
@@ -120,9 +122,12 @@ class _ContactPageState extends State<ContactPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 4, // zone de texte plus grande
-                validator: (value) => (value == null || value.isEmpty)
-                    ? 'Veuillez entrer un message'
-                    : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer un message';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 24.0),
 
