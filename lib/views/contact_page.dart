@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // stockage local (clé/valeur)
-import 'dart:convert'; // pour gérer JSON (encodage/décodage)
+import 'package:url_launcher/url_launcher.dart'; // pour ouvrir client e-mail
 import '../widgets/app_scaffold.dart';
 
 class ContactPage extends StatefulWidget {
@@ -25,42 +24,34 @@ class _ContactPageState extends State<ContactPage> {
     super.dispose();
   }
 
-  // save le message dans le stockage local (shared prefs)
-  Future<void> _saveFormData() async {
-    final newEntry = {
-      'name': _nameController.text,
-      'email': _emailController.text,
-      'message': _messageController.text,
-      'timestamp': DateTime.now().toIso8601String(), // date ISO
-    };
-
-    final prefs = await SharedPreferences.getInstance(); // récup accès au stockage
-    final existing = prefs.getString('contactMessages'); // récup les données existantes
-
-    List<dynamic> messages = [];
-
-    if (existing != null && existing.trim().isNotEmpty) {
-      messages = jsonDecode(existing); // convertit le json string en liste
-    }
-
-    messages.add(newEntry); // ajoute la nouvelle entrée
-
-    await prefs.setString(
-      'contactMessages',
-      jsonEncode(messages), // convertit la liste complète en string JSON
+  // construit et ouvre un mailto: avec le contenu du formulaire
+  Future<void> _sendEmail() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'benjamin.bonnevial@my-digital-school.org', // destinataire du message
+      query: Uri.encodeFull(
+        'subject=Message depuis le formulaire de votre app Flutter&body=' // objet du mail
+        'Nom : ${_nameController.text}\n'
+        'Email : ${_emailController.text}\n'
+        'Message : ${_messageController.text}',
+      ),
     );
+
+    if (!await launchUrl(emailUri)) {
+      throw Exception('Impossible d\'ouvrir le client mail'); // gestion erreur
+    }
   }
 
   // appelé quand l'utilisateur press Envoyer
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      await _saveFormData(); // enregistre dans shared_preferences
+      await _sendEmail(); // ouvre le client mail
 
-      if (!mounted) return; // évite d'utiliser context si le widget a été démonté
+      if (!mounted) return; // évite erreurs si le widget a été démonté
 
       ScaffoldMessenger.of(context).showSnackBar(
         // feedback visuel
-        const SnackBar(content: Text('Message envoyé !')),
+        const SnackBar(content: Text('Client mail ouvert.')),
       );
 
       // reset du formulaire et des champs
@@ -132,7 +123,7 @@ class _ContactPageState extends State<ContactPage> {
               const SizedBox(height: 24.0),
 
               ElevatedButton(
-                onPressed: _submitForm, // déclenche validation + sauvegarde
+                onPressed: _submitForm, // déclenche validation + ouverture client mail
                 child: const Text('Envoyer'),
               ),
             ],
