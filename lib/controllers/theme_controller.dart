@@ -1,16 +1,21 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // nécessaire pour utiliser ThemeMode et ChangeNotifier
 
+// classe qui gère le thème clair/sombre de l'app
 class ThemeController extends ChangeNotifier {
-  bool _isDarkMode = false; // état actuel : false = clair, true = sombre
+  // ChangeNotifier permet de notifier les widgets qui écoutent (ex: via Provider)
 
-  bool get isDarkMode => _isDarkMode; // expose l’état actuel
+  bool _isDarkMode =
+      false; // état interne du thème, false = clair, true = sombre
 
-  // retourne le thème à utiliser (light ou dark)
+  // getter public → expose l'état actuel à d'autres widgets
+  bool get isDarkMode => _isDarkMode;
+
+  // retourne le type de thème à appliquer, utilisé par MaterialApp (light ou dark)
   ThemeMode get currentTheme => _isDarkMode ? ThemeMode.dark : ThemeMode.light;
 
-  // change le thème (inverse) et notifie l'app
+  // inverse l'état du thème et notifie tous les widgets
   void toggleTheme() {
-    _isDarkMode = !_isDarkMode;
-    notifyListeners(); // informe les widgets qu’il faut rebuild
+    _isDarkMode = !_isDarkMode; // switch de true à false ou inverse
+    notifyListeners(); // rebuild des widgets qui utilisent le controller
   }
 }

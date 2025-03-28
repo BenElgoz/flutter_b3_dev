@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-import '../models/article.dart'; // modèle article
-import '../widgets/app_scaffold.dart'; // scaffold avec menu
-import 'article_detail_page.dart'; // page détails article
+import 'package:flutter/material.dart'; 
+import 'dart:convert'; // pour jsonDecode
+import 'package:http/http.dart' as http; // requêtes HTTP
+import '../models/article.dart'; // modèle de données Article
+import '../widgets/app_scaffold.dart'; 
+import 'article_detail_page.dart'; // page de détails article
 
 class ArticlesPage extends StatefulWidget {
   const ArticlesPage({super.key});
@@ -20,12 +19,15 @@ class _ArticlesPageState extends State<ArticlesPage> {
   int _currentPage = 0; // page courante
   List<Article> _allArticles = []; // tous les articles récupérés
 
+  // fonction qui récupère les articles depuis l'API
   Future<List<Article>> fetchArticles() async {
     final response =
         await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
     if (response.statusCode == 200) {
-      final List jsonData = json.decode(response.body); // parse json
-      return jsonData.map((json) => Article.fromJson(json)).toList();
+      final List jsonData = json.decode(response.body); // parse JSON
+      return jsonData
+          .map((json) => Article.fromJson(json))
+          .toList(); // map en liste d'objets Article
     } else {
       throw Exception('Erreur de chargement des articles');
     }
@@ -37,29 +39,32 @@ class _ArticlesPageState extends State<ArticlesPage> {
     futureArticles = fetchArticles(); // appel API au chargement
   }
 
+  // passe à la page suivante si possible
   void _goToNextPage() {
     if ((_currentPage + 1) * _articlesPerPage < _allArticles.length) {
       setState(() {
-        _currentPage++; // page suivante
+        _currentPage++;
       });
     }
   }
 
+  // revient à la page précédente
   void _goToPreviousPage() {
     if (_currentPage > 0) {
       setState(() {
-        _currentPage--; // page précédente
+        _currentPage--;
       });
     }
   }
 
+  // retourne la liste des articles à afficher pour la page courante
   List<Article> _getPaginatedArticles() {
     final start = _currentPage * _articlesPerPage;
     final end = (_currentPage + 1) * _articlesPerPage;
     return _allArticles.sublist(
       start,
       end > _allArticles.length ? _allArticles.length : end,
-    ); // retourne les articles de la page courante
+    );
   }
 
   @override
@@ -71,10 +76,13 @@ class _ArticlesPageState extends State<ArticlesPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator()); // chargement
+              child:
+                  CircularProgressIndicator(), // affichage d'un spinner de chargement
+            );
           } else if (snapshot.hasError) {
             return Center(
-                child: Text('Erreur : ${snapshot.error}')); // si erreur
+              child: Text('Erreur : ${snapshot.error}'), // erreur API
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Aucun article trouvé.'));
           }
@@ -88,13 +96,14 @@ class _ArticlesPageState extends State<ArticlesPage> {
               Expanded(
                 child: ListView.separated(
                   itemCount: paginatedArticles.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1), // ligne entre les items
                   itemBuilder: (context, index) {
                     final article = paginatedArticles[index];
                     return ListTile(
-                      title: Text(article.title), // affiche titre
+                      title: Text(article.title), // affiche le titre
                       onTap: () {
-                        // va à la page de détails
+                        // navigation vers la page de détails
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -106,7 +115,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
                   },
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(height: 1), // séparation avec les boutons
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
@@ -117,8 +126,8 @@ class _ArticlesPageState extends State<ArticlesPage> {
                       child: const Text('Précédent'),
                     ),
                     Text(
-                      'Page ${_currentPage + 1} / ${(_allArticles.length / _articlesPerPage).ceil()}',
-                    ), // x / total
+                      'Page ${_currentPage + 1} / ${(_allArticles.length / _articlesPerPage).ceil()}', // x / total
+                    ),
                     ElevatedButton(
                       onPressed: (_currentPage + 1) * _articlesPerPage <
                               _allArticles.length

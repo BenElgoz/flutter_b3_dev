@@ -1,64 +1,71 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // stockage local
-import 'dart:convert'; // pour encoder/décoder json
-
-import '../widgets/app_scaffold.dart'; // scaffold avec menu etc.
+import 'package:flutter/material.dart'; 
+import 'package:shared_preferences/shared_preferences.dart'; // stockage local (clé/valeur)
+import 'dart:convert'; // pour gérer JSON (encodage/décodage)
+import '../widgets/app_scaffold.dart'; 
 
 class ContactPage extends StatefulWidget {
-  const ContactPage({super.key});
+  const ContactPage({super.key}); 
 
   @override
-  State<ContactPage> createState() => _ContactPageState();
+  State<ContactPage> createState() =>
+      _ContactPageState();
 }
 
 class _ContactPageState extends State<ContactPage> {
-  final _formKey = GlobalKey<FormState>(); // clé du formulaire
+  final _formKey = GlobalKey<
+      FormState>(); // identifie le formulaire, sert pour la validation
   final _nameController = TextEditingController(); // champ nom
-  final _emailController = TextEditingController(); // champ email
-  final _messageController = TextEditingController(); // champ message
+  final _emailController = TextEditingController(); // "" email
+  final _messageController = TextEditingController(); // "" message
 
   @override
   void dispose() {
-    // nettoyage des contrôleurs
+    // appelé quand le widget est détruit puis libère les données
     _nameController.dispose();
     _emailController.dispose();
     _messageController.dispose();
     super.dispose();
   }
 
+  // save le message dans le stockage local (shared prefs)
   Future<void> _saveFormData() async {
     final newEntry = {
       'name': _nameController.text,
       'email': _emailController.text,
       'message': _messageController.text,
-      'timestamp': DateTime.now().toIso8601String(),
+      'timestamp': DateTime.now().toIso8601String(), // date ISO
     };
 
-    final prefs = await SharedPreferences.getInstance(); // accès au stockage
+    final prefs =
+        await SharedPreferences.getInstance(); // récup accès au stockage
     final existing =
-        prefs.getString('contactMessages'); // récup anciennes données
+        prefs.getString('contactMessages'); // récup les données existantes
 
     List<dynamic> messages = [];
 
     if (existing != null && existing.trim().isNotEmpty) {
-      messages = jsonDecode(existing); // transforme json → liste
+      messages = jsonDecode(existing); // convertit le json string en liste
     }
 
-    messages.add(newEntry); // ajoute le msg
+    messages.add(newEntry); // ajoute la nouvelle entrée
 
     await prefs.setString(
-        'contactMessages', jsonEncode(messages)); // sauvegarde
+      'contactMessages',
+      jsonEncode(messages), // convertit la liste complète en string JSON
+    );
   }
 
+  // appelé quand l'utilisateur press Envoyer
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      await _saveFormData(); // sauvegarde locale
+      await _saveFormData(); // enregistre dans shared_preferences
 
       ScaffoldMessenger.of(context).showSnackBar(
+        // feedback visuel
         const SnackBar(content: Text('Message envoyé !')),
       );
 
-      // reset form + champs
+      // reset du formulaire et des champs
       _formKey.currentState!.reset();
       _nameController.clear();
       _emailController.clear();
@@ -73,50 +80,54 @@ class _ContactPageState extends State<ContactPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // associe la clé au form
+          key: _formKey, // associe le formulaire à sa clé
           child: ListView(
             children: [
               TextFormField(
-                controller: _nameController,
+                controller: _nameController, // champ lié à Nom
                 decoration: const InputDecoration(
                   labelText: 'Nom',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) => (value == null || value.isEmpty)
                     ? 'Veuillez entrer votre nom'
-                    : null,
+                    : null, // valide : champ obligatoire
               ),
               const SizedBox(height: 16.0),
+
               TextFormField(
-                controller: _emailController,
+                controller: _emailController, // champ lié à Email
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.emailAddress,
+                keyboardType:
+                    TextInputType.emailAddress, // clavier adapté email
                 validator: (value) {
                   if (value == null || value.isEmpty)
                     return 'Veuillez entrer votre email';
                   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
-                    return 'Veuillez entrer un email valide';
+                    return 'Veuillez entrer un email valide'; // regex simple
                   return null;
                 },
               ),
               const SizedBox(height: 16.0),
+
               TextFormField(
-                controller: _messageController,
+                controller: _messageController, // champ lié à Message
                 decoration: const InputDecoration(
                   labelText: 'Message',
                   border: OutlineInputBorder(),
                 ),
-                maxLines: 4,
+                maxLines: 4, // zone de texte plus grande
                 validator: (value) => (value == null || value.isEmpty)
                     ? 'Veuillez entrer un message'
                     : null,
               ),
               const SizedBox(height: 24.0),
+
               ElevatedButton(
-                onPressed: _submitForm, // valide et sauvegarde
+                onPressed: _submitForm, // déclenche validation + sauvegarde
                 child: const Text('Envoyer'),
               ),
             ],
